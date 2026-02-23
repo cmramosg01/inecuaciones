@@ -12,3 +12,7 @@ Recurso interactivo para **1º de Bachillerato (Matemáticas Generales)**: repas
 - Actividades de práctica con **autocorrección** (respuesta múltiple/decisión y respuestas guiadas).
 - Sección de apoyo para **GeoGebra** (sintaxis de restricciones y sistemas).
 - Modo impresión/“ficha” (según versión publicada).
+
+## Licencia
+Este recurso se publica bajo **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**.  
+Consulta `LICENSE` para más información.
