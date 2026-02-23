@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Optimiza tu taller — Inecuaciones → Programación lineal</title>
+
+  <!-- MathJax (fórmulas) -->
+  <script>
+    window.MathJax = { tex: { inlineMath: [['\\(','\\)'], ['$', '$']] }, svg: { fontCache: 'global' } };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <style>
+    :root{
+      --bg:#0b1220; --card:#0f1a2e; --muted:#a6b6d6; --text:#e9f0ff;
+      --accent:#26e6c8; --accent2:#5bbcff;
+      --ok:#34d399; --warn:#fbbf24; --bad:#fb7185;
+      --border: rgba(255,255,255,.10);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      --base: 16px;
+    }
+    body{ margin:0; font-family:var(--sans); background: var(--bg); color:var(--text); font-size: var(--base); }
+    a{ color: var(--accent2); text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+
+    header{
+      padding: 18px 16px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(38,230,200,.10), rgba(11,18,32,.95));
+      position: sticky; top:0; z-index: 40;
+      backdrop-filter: blur(8px);
+    }
+    .wrap{ max-width: 1120px; margin:0 auto; }
+    .top{ display:flex; gap:16px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; }
+    .brand{ display:flex; gap:14px; align-items:center; }
+    .brand img{ width:76px; height:76px; object-fit:contain; border-radius: 14px; background: rgba(255,255,255,.06); border:1px solid var(--border); padding:6px;}
+    h1{ margin:0; font-size:1.22rem; letter-spacing:.2px;}
+    .subtitle{ margin-top:6px; color:var(--muted); font-size:.96rem; line-height:1.35; max-width: 80ch; }
+    .meta{ color:var(--muted); font-size:.92rem; line-height:1.45; }
+    .nav{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .pill{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      padding: 8px 10px; border-radius: 999px;
+      font-size: .92rem; cursor:pointer; user-select:none;
+    }
+    .pill:hover{ border-color: rgba(38,230,200,.55); }
+
+    main{ padding: 16px 16px 60px; }
+    .grid{ display:grid; grid-template-columns: 1.2fr .8fr; gap: 14px; }
+    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .head{
+      padding: 14px 16px;
+      display:flex; justify-content:space-between; gap:12px; align-items:center;
+      border-bottom: 1px solid var(--border);
+    }
+    .head h2{ margin:0; font-size: 1.05rem; }
+    .body{ padding: 14px 16px; }
+
+    .btn{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-size: .95rem;
+    }
+    .btn:hover{ border-color: rgba(91,188,255,.65); }
+    .btn.primary{ border-color: rgba(38,230,200,.65); }
+    .btn.bad{ border-color: rgba(251,113,133,.6); }
+
+    select.btn{ width:100%; }
+    .mini{ font-size:.92rem; color:var(--muted); line-height:1.45; }
+    .code{
+      font-family: var(--mono);
+      font-size: .92rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,.22);
+      overflow:auto;
+      line-height:1.4;
+      white-space: pre-wrap;
+    }
+    .callout{
+      border-left: 4px solid rgba(38,230,200,.65);
+      background: rgba(38,230,200,.08);
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin: 10px 0;
+    }
+    .callout.warn{ border-left-color: rgba(251,191,36,.75); background: rgba(251,191,36,.10); }
+    .callout.ok{ border-left-color: rgba(52,211,153,.75); background: rgba(52,211,153,.10); }
+    .callout.bad{ border-left-color: rgba(251,113,133,.75); background: rgba(251,113,133,.10); }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .hr{ height:1px; background: var(--border); margin: 14px 0; }
+    .badge{
+      display:inline-block; font-size:.85rem; padding: 3px 8px; border-radius:999px;
+      border: 1px solid var(--border); background: rgba(255,255,255,.03); color: var(--muted);
+    }
+    details{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.03);
+      margin: 10px 0;
+    }
+    summary{ cursor:pointer; font-weight:650; }
+    .steps{ margin: 10px 0 0; padding-left: 18px; }
+    .steps li{ margin: 6px 0; }
+
+    input[type="text"], input[type="password"]{
+      width:100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      font-family: var(--mono);
+    }
+
+    .hidden{ display:none !important; }
+
+    /* Botón “modo proyector” */
+    .big{ --base: 18px; }
+    .bigger{ --base: 20px; }
+
+    /* Impresión (PDF) */
+    @media print{
+      header, .nav, .no-print{ display:none !important; }
+      body{ background:#fff; color:#000; }
+      .card{ box-shadow:none; border:1px solid #ddd; background:#fff; }
+      .callout{ background:#f3f6ff; }
+      .code{ background:#f7f7f7; }
+      a{ color:#000; text-decoration:none; }
+    }
+
+    /* Tabs */
+    .tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
+    .tab{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      padding: 8px 10px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-size: .92rem;
+      user-select:none;
+    }
+    .tab.active{ border-color: rgba(38,230,200,.75); background: rgba(38,230,200,.10); }
+    .tabpane{ margin-top: 12px; }
+    .choicegrid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+    }
+    @media (max-width: 700px){ .choicegrid{ grid-template-columns: 1fr; } }
+    .choice{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,.18);
+      cursor:pointer;
+    }
+    .choice:hover{ border-color: rgba(91,188,255,.65); }
+    .choice strong{ display:block; margin-bottom:4px;}
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="wrap top">
+    <div class="brand">
+      <!-- Cambia logo.png por la URL del logo en WordPress si lo insertas allí -->
+      <img src="logo.png" alt="Logo IA-FP Robótica Inclusiva" />
+      <div>
+        <h1>Optimiza tu taller</h1>
+        <div class="subtitle">De las inecuaciones a la programación lineal · Ejemplos de FP (IES San José, Badajoz)</div>
+        <div class="meta">
+          Proyecto CITE-STEAM <b>“IA, FP y robótica inclusiva”</b> · <b>IES San José (Badajoz)</b><br/>
+          Coordinadora: <b>Cristina Ramos García</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav no-print">
+      <span class="pill" data-jump="#teoria">Teoría</span>
+      <span class="pill" data-jump="#ejemplos">Ejemplos FP</span>
+      <span class="pill" data-jump="#practica">Práctica</span>
+      <span class="pill" data-jump="#geogebra">GeoGebra</span>
+      <span class="pill" data-jump="#profesor">Profesor</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap grid">
+
+    <!-- TEORÍA -->
+    <section class="card" id="teoria">
+      <div class="head">
+        <h2>1) Teoría mínima (en lenguaje de aula)</h2>
+        <span class="badge">original</span>
+      </div>
+      <div class="body">
+        <details open>
+          <summary>1D — Inecuaciones de 1º grado</summary>
+          <ol class="steps">
+            <li>Ordena y despeja \(x\) como en ecuaciones.</li>
+            <li>Si multiplicas o divides por un número negativo, el signo cambia de dirección.</li>
+            <li>Expresa como intervalo/semirrecta y comprueba con un valor de prueba.</li>
+          </ol>
+        </details>
+
+        <details>
+          <summary>1D — Cuadráticas / polinómicas / racionales (idea común)</summary>
+          <ol class="steps">
+            <li>Escribe todo como “algo \(\square\) 0”.</li>
+            <li>Localiza puntos críticos: ceros (y en racionales también donde no existe).</li>
+            <li>Divide la recta en intervalos y decide el signo en cada uno.</li>
+          </ol>
+          <div class="callout warn">
+            Truco didáctico: un solo punto de prueba por intervalo suele bastar.
+          </div>
+        </details>
+
+        <details>
+          <summary>2D — Inecuaciones lineales: semiplanos</summary>
+          <ol class="steps">
+            <li>La frontera es una recta (la igualdad).</li>
+            <li>Elige un punto fácil (normalmente (0,0) si no está en la recta).</li>
+            <li>Si el punto cumple la desigualdad, sombreas ese lado; si no, el otro.</li>
+          </ol>
+        </details>
+
+        <details>
+          <summary>Programación lineal (PL) — lo que se hace en clase</summary>
+          <ol class="steps">
+            <li>Variables + restricciones lineales → región factible.</li>
+            <li>El óptimo (máximo o mínimo) aparece en un vértice (o en un lado completo si hay empate).</li>
+            <li>Por eso: calculas vértices, evalúas la función, comparas.</li>
+          </ol>
+        </details>
+
+        <div class="callout ok">
+          Este recurso usa ejemplos nuevos creados para FP del centro (no reproduce literalmente apuntes externos).
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL -->
+    <aside class="card no-print">
+      <div class="head">
+        <h2>Panel</h2>
+        <span class="badge">FP</span>
+      </div>
+      <div class="body">
+        <label class="mini" for="familiaSel">Familia FP:</label>
+        <div style="margin:8px 0 12px">
+          <select id="familiaSel" class="btn">
+            <option value="pelu">Peluquería y estética</option>
+            <option value="madera">Madera y mueble</option>
+            <option value="sold">Soldadura, fabricación y montaje</option>
+            <option value="auto">Automoción</option>
+            <option value="alim">Industria alimentaria</option>
+            <option value="prl">Prevención de Riesgos Profesionales</option>
+            <option value="admin">Gestión Administrativa y Administración y Finanzas</option>
+          </select>
+        </div>
+
+        <div class="callout">
+          <b>Objetivo contextual</b><br/>
+          <span id="objetivoTxt" class="mini"></span>
+        </div>
+
+        <div class="row">
+          <button class="btn primary" id="btnEjemplo">Ejemplo resuelto</button>
+          <button class="btn" id="btnPractica">Práctica</button>
+          <button class="btn" id="btnPrint">Imprimir / PDF</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <button class="btn" id="btnFont1">Texto normal</button>
+          <button class="btn" id="btnFont2">Proyector</button>
+          <button class="btn" id="btnFont3">Proyector+</button>
+        </div>
+
+        <div class="hr"></div>
+        <div class="mini">
+          Modo aula: pide que propongan el “siguiente paso” antes de revelarlo.
+        </div>
+      </div>
+    </aside>
+
+    <!-- EJEMPLOS -->
+    <section class="card" id="ejemplos">
+      <div class="head">
+        <h2>2) Ejemplos FP (5 por familia) — paso a paso</h2>
+        <span class="badge">interactivo</span>
+      </div>
+      <div class="body">
+        <div id="ejemploBox"></div>
+
+        <div class="row no-print" style="margin-top:10px">
+          <button class="btn" id="btnPista">Pista</button>
+          <button class="btn" id="btnPaso">Siguiente paso</button>
+          <button class="btn primary" id="btnSol">Solución</button>
+          <button class="btn" id="btnOtro">Otro ejemplo</button>
+        </div>
+
+        <div class="hr"></div>
+        <div class="mini">
+          Nota: en PL, si el modelo admite valores decimales, el “óptimo” puede ser decimal; si se exige producción entera, se prueba alrededor.
+        </div>
+      </div>
+    </section>
+
+    <!-- PRÁCTICA -->
+    <section class="card" id="practica">
+      <div class="head">
+        <h2>3) Práctica (autocorrección 1D, PL y 2D por decisión)</h2>
+        <span class="badge">feedback</span>
+      </div>
+      <div class="body">
+        <div class="tabs no-print" role="tablist" aria-label="Pestañas de práctica">
+          <div class="tab active" data-tab="t1">1D</div>
+          <div class="tab" data-tab="t2">2D (elige lado)</div>
+          <div class="tab" data-tab="t3">PL</div>
+        </div>
+
+        <div class="tabpane" id="tab-t1">
+          <div class="callout ok">
+            <b>1D</b> — escribe la respuesta en el formato pedido. El corrector acepta variantes razonables.
+          </div>
+          <div id="practicaBox1D"></div>
+          <label class="mini" for="respInput1D">Tu respuesta:</label>
+          <input id="respInput1D" type="text" placeholder="Ej.: x <= 10  |  (-inf,2] U [3,inf)" />
+          <div class="row no-print" style="margin-top:10px">
+            <button class="btn primary" id="btnCheck1D">Comprobar</button>
+            <button class="btn" id="btnHint1D">Pista</button>
+            <button class="btn" id="btnNew1D">Nuevo</button>
+          </div>
+          <div id="feedback1D" class="callout hidden" style="margin-top:10px"></div>
+        </div>
+
+        <div class="tabpane hidden" id="tab-t2">
+          <div class="callout ok">
+            <b>2D</b> — como no podemos “dibujar” aquí, haremos lo que sí se puede corregir:
+            elegir el semiplano correcto con un punto de prueba.
+          </div>
+          <div id="practicaBox2D"></div>
+          <div class="choicegrid no-print" id="choices2D"></div>
+          <div class="row no-print" style="margin-top:10px">
+            <button class="btn" id="btnNew2D">Nuevo</button>
+            <button class="btn" id="btnHint2D">Pista</button>
+          </div>
+          <div id="feedback2D" class="callout hidden" style="margin-top:10px"></div>
+        </div>
+
+        <div class="tabpane hidden" id="tab-t3">
+          <div class="callout ok">
+            <b>PL</b> — escribe el vértice óptimo y el valor de z. (Modelo continuo)
+          </div>
+          <div id="practicaBoxPL"></div>
+          <label class="mini" for="respInputPL">Tu respuesta:</label>
+          <input id="respInputPL" type="text" placeholder="Ej.: optimo: (x,y)=(12,4), z=640" />
+          <div class="row no-print" style="margin-top:10px">
+            <button class="btn primary" id="btnCheckPL">Comprobar</button>
+            <button class="btn" id="btnHintPL">Pista</button>
+            <button class="btn" id="btnNewPL">Nuevo</button>
+          </div>
+          <div id="feedbackPL" class="callout hidden" style="margin-top:10px"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- GEOGEBRA -->
+    <section class="card" id="geogebra">
+      <div class="head">
+        <h2>4) GeoGebra (listo para incrustar por familia)</h2>
+        <span class="badge">applet</span>
+      </div>
+      <div class="body">
+        <div class="callout warn">
+          Para escribir un sistema de restricciones en GeoGebra, puedes unir condiciones con <b>&&</b>:
+        </div>
+        <div class="code">(2x + y <= 18) && (x + 3y <= 24) && (x >= 0) && (y >= 0)</div>
+
+        <div class="hr"></div>
+
+        <div class="mini"><b>Applet por familia (rellena TU_ID_AQUI cuando lo tengas):</b></div>
+        <div class="code" id="ggCode"></div>
+
+        <div class="hr"></div>
+        <div class="mini">
+          Sugerencia: crea 1 applet por familia con su problema “estrella” de PL y deja este iframe vinculado al selector.
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFESOR -->
+    <section class="card" id="profesor">
+      <div class="head">
+        <h2>5) Modo profesor (protege la solución)</h2>
+        <span class="badge">PIN</span>
+      </div>
+      <div class="body">
+        <p class="mini">
+          Esto evita que el alumnado pulse “Solución” a la primera en ejemplos. El PIN está en el código (puedes cambiarlo).
+        </p>
+        <label class="mini" for="pinInput">PIN:</label>
+        <input id="pinInput" type="password" placeholder="Escribe el PIN" />
+        <div class="row no-print" style="margin-top:10px">
+          <button class="btn primary" id="btnUnlock">Activar modo profesor</button>
+          <button class="btn bad" id="btnLock">Desactivar</button>
+        </div>
+        <div id="profStatus" class="callout hidden" style="margin-top:10px"></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+  // -------------------------
+  // Navegación
+  // -------------------------
+  document.querySelectorAll('[data-jump]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const id = el.getAttribute('data-jump');
+      const target = document.querySelector(id);
+      if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+
+  // -------------------------
+  // Tabs práctica
+  // -------------------------
+  const tabs = document.querySelectorAll('.tab');
+  const panes = {
+    t1: document.getElementById('tab-t1'),
+    t2: document.getElementById('tab-t2'),
+    t3: document.getElementById('tab-t3')
+  };
+  tabs.forEach(t=>{
+    t.addEventListener('click', ()=>{
+      tabs.forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      const key = t.getAttribute('data-tab');
+      Object.values(panes).forEach(p=>p.classList.add('hidden'));
+      panes[key].classList.remove('hidden');
+      if(window.MathJax && MathJax.typesetPromise){ MathJax.typesetPromise(); }
+    });
+  });
+
+  // -------------------------
+  // Texto (móvil / proyector)
+  // -------------------------
+  document.getElementById('btnFont1').onclick = ()=>{ document.body.classList.remove('big','bigger'); };
+  document.getElementById('btnFont2').onclick = ()=>{ document.body.classList.add('big'); document.body.classList.remove('bigger'); };
+  document.getElementById('btnFont3').onclick = ()=>{ document.body.classList.add('bigger'); document.body.classList.remove('big'); };
+
+  // -------------------------
+  // Imprimir / PDF
+  // -------------------------
+  document.getElementById('btnPrint').onclick = ()=> window.print();
+
+  // -------------------------
+  // Contexto por familia
+  // -------------------------
+  const objetivos = {
+    pelu: "Ajustar tiempos y materiales para maximizar citas del salón sin pasarte del horario.",
+    madera: "Optimizar tableros y horas de taller para obtener la producción con mayor valor.",
+    sold: "Planificar piezas con límites de material, tiempo y seguridad del puesto.",
+    auto: "Organizar reparaciones y revisiones con tiempo y repuestos limitados.",
+    alim: "Combinar lotes con materias primas y capacidad de producción (horno, frío, envasado).",
+    prl: "Planificar acciones preventivas con horas limitadas y priorizar el impacto en seguridad.",
+    admin: "Asignar horas y recursos a tareas para maximizar valor o minimizar coste."
+  };
+
+  const familiaSel = document.getElementById('familiaSel');
+  const objetivoTxt = document.getElementById('objetivoTxt');
+  function setObjetivo(){ objetivoTxt.textContent = objetivos[familiaSel.value]; }
+  setObjetivo();
+
+  // -------------------------
+  // Modo profesor (PIN)
+  // -------------------------
+  let teacher = false;
+  const PIN = "1978"; // cámbialo libremente
+  const profStatus = document.getElementById('profStatus');
+
+  function showProf(msg, ok=true){
+    profStatus.classList.remove('hidden');
+    profStatus.className = "callout " + (ok ? "ok" : "bad");
+    profStatus.innerHTML = `<b>${ok ? "Modo profesor" : "PIN incorrecto"}</b><br/><span class="mini">${msg}</span>`;
+  }
+
+  document.getElementById('btnUnlock').onclick = ()=>{
+    const v = document.getElementById('pinInput').value || "";
+    if(v === PIN){
+      teacher = true;
+      showProf("Activado: ahora puedes mostrar soluciones completas.", true);
+    }else{
+      teacher = false;
+      showProf("No se ha activado. Revisa el PIN.", false);
+    }
+  };
+  document.getElementById('btnLock').onclick = ()=>{
+    teacher = false;
+    showProf("Desactivado.", true);
+  };
+
+  // -------------------------
+  // Banco de ejemplos (ORIGINALES) — 5 por familia
+  // Tipos: lin1, quad1, rat1, lin2, pl
+  // -------------------------
+  const ejemplos = {
+    pelu: [
+      { tipo:"lin1", titulo:"Peluquería: límite de citas",
+        enunciado:"Cada tinte ocupa 45 min de cabina. Hoy hay 6 horas de cabina disponibles. ¿Cuántos tintes x como máximo?",
+        pista:"Pasa todo a minutos y despeja x.",
+        pasos:["Tiempo total: 6 h = 360 min.","Inecuación: 45x ≤ 360.","Divide entre 45: x ≤ 8."],
+        solucion:"Máximo: x = 8 tintes."},
+      { tipo:"quad1", titulo:"Peluquería: promoción (modelo simple)",
+        enunciado:"Para un pack, el beneficio (en €) depende de x: \\(B(x)= -x^2+10x-16\\). ¿Para qué valores de x se cumple \\(B(x)\\ge 0\\)?",
+        pista:"Resuelve la ecuación asociada y usa intervalos.",
+        pasos:["Plantea: -x^2+10x-16 ≥ 0.","Multiplica por -1 (cambia el signo): x^2-10x+16 ≤ 0.",
+              "Raíces: x=(10±√(100-64))/2=(10±6)/2 ⇒ x=2, x=8.","Como es ≤0 entre raíces: 2 ≤ x ≤ 8."],
+        solucion:"Solución: \\(x \\in [2,8]\\)."},
+      { tipo:"rat1", titulo:"Peluquería: coste por lote (racional)",
+        enunciado:"Analiza: \\(\\frac{x-3}{x+1} > 0\\). Da la solución como unión de intervalos.",
+        pista:"Puntos críticos: x=3 y x=-1 (este se excluye).",
+        pasos:["Dominio: x ≠ -1.","Ceros/crit.: numerador 0 en x=3; denominador 0 en x=-1.",
+              "Tabla de signos en (-∞,-1), (-1,3), (3,∞).","Resultado: positivo en (-∞,-1) y (3,∞)."],
+        solucion:"Solución: \\(( -\\infty,-1) \\cup (3,\\infty)\\)."},
+      { tipo:"lin2", titulo:"Peluquería: semiplano (2 variables)",
+        enunciado:"x = cortes, y = peinados. El tiempo cumple \\(20x+40y\\le 240\\) (min). Dibuja la recta frontera y decide el semiplano.",
+        pista:"Comprueba el punto (0,0).",
+        pasos:["Frontera: 20x+40y=240 ⇒ x+2y=12.","La recta pasa por (12,0) y (0,6).",
+              "Punto (0,0): 0 ≤ 240 verdadero.","Semiplano que contiene el origen."],
+        solucion:"Solución: semiplano bajo/igual a la recta x+2y=12 (y en contexto, x,y≥0)."},
+      { tipo:"pl", titulo:"Peluquería: maximiza beneficio",
+        enunciado:"Servicios: alisados x y manicuras y. Restricciones: \\(2x+y\\le 18\\), \\(x+3y\\le 24\\), \\(x,y\\ge0\\). Beneficio: \\(z=40x+20y\\).",
+        pista:"Busca vértices y evalúa z.",
+        pasos:["Vértices con ejes: (0,0), (9,0), (0,8).","Intersección: 2x+y=18 y x+3y=24 ⇒ y=6, x=6.",
+              "Evalúa z: z(9,0)=360; z(0,8)=160; z(6,6)=360.","Empate en (9,0) y (6,6)."],
+        solucion:"Óptimo z=360 (solución óptima no única)."}
+    ],
+    madera: [
+      { tipo:"lin1", titulo:"Madera: corte de listones",
+        enunciado:"Cada estantería usa 1,2 m de listón. Hay 15 m. ¿Máximo x de estanterías?",
+        pista:"Divide por 1,2 y recuerda que x es entero.",
+        pasos:["1,2x ≤ 15","x ≤ 12,5","x máximo entero: 12"],
+        solucion:"Máximo: x=12."},
+      { tipo:"quad1", titulo:"Madera: control de desperdicio",
+        enunciado:"Se modela un indicador: \\(D(x)=x^2-8x+12\\). Queremos \\(D(x)\\le 0\\).",
+        pista:"Raíces y “entre raíces”.",
+        pasos:["Resuelve x^2-8x+12=0 ⇒ (x-2)(x-6)=0.","Raíces: 2 y 6.","Como es ≤0 entre raíces.","Resultado: 2 ≤ x ≤ 6."],
+        solucion:"Solución: \\([2,6]\\)."},
+      { tipo:"rat1", titulo:"Madera: ratio de coste",
+        enunciado:"Resuelve \\(\\frac{2x-5}{x-4} \\le 0\\).",
+        pista:"Críticos: x=2,5 y x=4 (excluido).",
+        pasos:["Dominio: x≠4.","Cero: 2x-5=0 ⇒ x=2,5. Discontinuidad: x=4.",
+              "Tabla de signos en (-∞,2,5], (2,5,4), (4,∞).","≤0 en [2,5,4) (incluye 2,5; excluye 4)."],
+        solucion:"Solución: \\([2{,}5,4)\\)."},
+      { tipo:"lin2", titulo:"Madera: semiplano por capacidad",
+        enunciado:"x=sillas, y=mesas. Capacidad: \\(x+3y\\le 24\\). Decide el lado correcto.",
+        pista:"Prueba (0,0).",
+        pasos:["Frontera: x+3y=24. Puntos: (24,0) y (0,8).","(0,0) cumple 0≤24.","Se sombrea el lado del origen."],
+        solucion:"Semiplano del origen (normalmente con x,y≥0)."},
+      { tipo:"pl", titulo:"Madera: mezcla de productos",
+        enunciado:"x=taburetes, y=mesas auxiliares. \\(x+2y\\le 20\\), \\(x+3y\\le 24\\), x,y≥0. Valor: z=30x+70y.",
+        pista:"Vértices: ejes + intersección.",
+        pasos:["Ejes: (0,0), (20,0), (0,8).","Intersección: x+2y=20 y x+3y=24 ⇒ y=4, x=12.",
+              "z(20,0)=600; z(0,8)=560; z(12,4)=640.","Mejor: (12,4)."],
+        solucion:"Óptimo: (12,4), z=640."}
+    ],
+    sold: [
+      { tipo:"lin1", titulo:"Soldadura: consumo de gas",
+        enunciado:"Cada pieza consume 0,6 unidades de gas. Hay 18 unidades. ¿Máximo x de piezas?",
+        pista:"x ≤ 18/0,6.",
+        pasos:["0,6x ≤ 18","x ≤ 30","x máximo 30"],
+        solucion:"Máximo: x=30."},
+      { tipo:"quad1", titulo:"Soldadura: tolerancia (modelo)",
+        enunciado:"Una medida cumple \\((x-5)(x-11)\\ge 0\\). Da el conjunto solución.",
+        pista:"Producto ≥0: fuera del intervalo entre raíces.",
+        pasos:["Raíces: 5 y 11.","El producto es ≥0 en (-∞,5] y [11,∞).","Incluye 5 y 11 por ≥."],
+        solucion:"Solución: \\(( -\\infty,5] \\cup [11,\\infty)\\)."},
+      { tipo:"rat1", titulo:"Soldadura: razón de seguridad",
+        enunciado:"Resuelve \\(\\frac{x+2}{x-3} < 0\\).",
+        pista:"Críticos: -2 y 3.",
+        pasos:["Dominio: x≠3.","Cero numerador: x=-2.","Signos por intervalos: (-∞,-2), (-2,3), (3,∞).","Negativo en (-2,3)."],
+        solucion:"Solución: \\((-2,3)\\)."},
+      { tipo:"lin2", titulo:"Soldadura: semiplano de horas",
+        enunciado:"x=piezas tipo A, y=tipo B. Horas: \\(3x+2y\\le 24\\). ¿Qué semiplano es?",
+        pista:"(0,0) siempre ayuda.",
+        pasos:["Recta: 3x+2y=24. Cortes: (8,0) y (0,12).","(0,0) cumple 0≤24.","Se sombrea el lado del origen."],
+        solucion:"Semiplano del origen (y añade x,y≥0 si procede)."},
+      { tipo:"pl", titulo:"Soldadura: maximiza producción ponderada",
+        enunciado:"x=A, y=B. \\(3x+2y\\le 24\\), \\(x+y\\le 10\\), x,y≥0. z=50x+30y.",
+        pista:"Vértices: ejes + intersección de rectas.",
+        pasos:["Ejes: (0,0), (8,0), (0,10).","Intersección: 3x+2y=24 y x+y=10 ⇒ x=4, y=6.",
+              "z(8,0)=400; z(0,10)=300; z(4,6)=380.","Mejor: (8,0)."],
+        solucion:"Óptimo: (8,0), z=400."}
+    ],
+    auto: [
+      { tipo:"lin1", titulo:"Automoción: tiempo de elevador",
+        enunciado:"Cada revisión usa 50 min de elevador. Hay 7 horas disponibles. ¿Máximo x revisiones?",
+        pista:"7 horas = 420 minutos.",
+        pasos:["50x ≤ 420","x ≤ 8,4","x máximo entero: 8"],
+        solucion:"Máximo: x=8."},
+      { tipo:"quad1", titulo:"Automoción: condición de rendimiento",
+        enunciado:"Resuelve \\(x^2-9x+14 \\ge 0\\).",
+        pista:"Factoriza si puedes.",
+        pasos:["x^2-9x+14 = (x-7)(x-2).","≥0 fuera del intervalo entre 2 y 7.","Incluye 2 y 7."],
+        solucion:"Solución: \\(( -\\infty,2] \\cup [7,\\infty)\\)."},
+      { tipo:"rat1", titulo:"Automoción: diagnóstico (racional)",
+        enunciado:"Resuelve \\(\\frac{x-6}{x-2} \\ge 0\\).",
+        pista:"Críticos: 2 (excluido) y 6 (incluido).",
+        pasos:["Dominio: x≠2.","Cero: x=6.","Signos: (+) en (-∞,2), (-) en (2,6), (+) en (6,∞).","≥0: (-∞,2) ∪ [6,∞)."],
+        solucion:"Solución: \\(( -\\infty,2) \\cup [6,\\infty)\\)."},
+      { tipo:"lin2", titulo:"Automoción: semiplano de repuestos",
+        enunciado:"x=cambios de aceite, y=cambios de pastillas. Repuestos: \\(x+2y\\le 20\\).",
+        pista:"Traza (20,0) y (0,10).",
+        pasos:["Recta frontera x+2y=20.","Puntos: (20,0), (0,10).","(0,0) cumple.","Semiplano del origen."],
+        solucion:"Semiplano del origen (con x,y≥0 si procede)."},
+      { tipo:"pl", titulo:"Automoción: ingresos del taller",
+        enunciado:"x=reparaciones, y=revisiones. \\(3x+y\\le 24\\), \\(x+2y\\le 20\\), x,y≥0. z=180x+90y.",
+        pista:"Vértices: ejes + intersección.",
+        pasos:["Ejes: (0,0), (8,0) y (0,10).","Intersección: 3x+y=24, x+2y=20 ⇒ x=5,6; y=7,2.",
+              "Evalúa z: (8,0)->1440; (0,10)->900; (5,6;7,2)->≈1656.","Mejor en el vértice de intersección (modelo continuo)."],
+        solucion:"Óptimo continuo aprox.: (5,6; 7,2) con z≈1656."}
+    ],
+    alim: [
+      { tipo:"lin1", titulo:"Industria alimentaria: envasado",
+        enunciado:"Cada lote requiere 18 min de envasado. Hay 5 horas. ¿Máximo x lotes?",
+        pista:"5h=300min.",
+        pasos:["18x ≤ 300","x ≤ 16,66…","Máximo entero: 16"],
+        solucion:"Máximo: x=16."},
+      { tipo:"quad1", titulo:"Alimentaria: control de mezcla (modelo)",
+        enunciado:"Resuelve \\((x-4)(x-9)\\le 0\\).",
+        pista:"Producto ≤0: entre raíces.",
+        pasos:["Raíces: 4 y 9.","≤0 en [4,9]."],
+        solucion:"Solución: \\([4,9]\\)."},
+      { tipo:"rat1", titulo:"Alimentaria: ratio de concentración",
+        enunciado:"Resuelve \\(\\frac{x-1}{x+5} \\le 0\\).",
+        pista:"Críticos: -5 (excluido) y 1 (incluido).",
+        pasos:["Dominio: x≠-5.","Cero: x=1.","Signos: (-∞,-5)->(+), (-5,1)->(-), (1,∞)->(+).","≤0: (-5,1]."],
+        solucion:"Solución: \\((-5,1]\\)."},
+      { tipo:"lin2", titulo:"Alimentaria: capacidad de horno",
+        enunciado:"x=bandejas tipo A, y=tipo B. \\(2x+3y\\le 30\\).",
+        pista:"Puntos: (15,0) y (0,10).",
+        pasos:["Recta frontera 2x+3y=30.","Cortes: (15,0) y (0,10).","(0,0) cumple, sombrea ese lado."],
+        solucion:"Semiplano del origen (con x,y≥0 si procede)."},
+      { tipo:"pl", titulo:"Alimentaria: maximiza kilos vendidos",
+        enunciado:"x=lotes A, y=lotes B. \\(2x+3y\\le 30\\), \\(x+y\\le 14\\), x,y≥0. z=25x+35y.",
+        pista:"Evalúa en vértices.",
+        pasos:["Ejes: (0,0), (14,0), (0,10).","Intersección: 2x+3y=30 y x+y=14 ⇒ x=12, y=2.",
+              "z(14,0)=350; z(0,10)=350; z(12,2)=370.","Mejor: (12,2)."],
+        solucion:"Óptimo: (12,2), z=370."}
+    ],
+    prl: [
+      { tipo:"lin1", titulo:"PRL: sesiones de formación",
+        enunciado:"Cada sesión dura 75 min. Hay 10 horas disponibles. ¿Máximo x sesiones?",
+        pista:"10h=600min.",
+        pasos:["75x ≤ 600","x ≤ 8","x máximo 8"],
+        solucion:"Máximo: x=8."},
+      { tipo:"quad1", titulo:"PRL: umbral (modelo)",
+        enunciado:"Resuelve \\(x^2-6x+5 \\le 0\\).",
+        pista:"Factoriza: (x-1)(x-5).",
+        pasos:["x^2-6x+5=(x-1)(x-5).","≤0 entre raíces.","Resultado: 1 ≤ x ≤ 5."],
+        solucion:"Solución: \\([1,5]\\)."},
+      { tipo:"rat1", titulo:"PRL: indicador (racional)",
+        enunciado:"Resuelve \\(\\frac{x+3}{x-1} > 0\\).",
+        pista:"Críticos: -3 y 1 (excluido).",
+        pasos:["Dominio: x≠1.","Cero: x=-3.","Signos: (+) en (-∞,-3), (-) en (-3,1), (+) en (1,∞).",">0: (-∞,-3) ∪ (1,∞)."],
+        solucion:"Solución: \\(( -\\infty,-3) \\cup (1,\\infty)\\)."},
+      { tipo:"lin2", titulo:"PRL: planificación de inspecciones",
+        enunciado:"x=inspecciones, y=charlas. \\(x+2y\\le 18\\).",
+        pista:"(0,0) cumple.",
+        pasos:["Recta frontera x+2y=18.","Cortes: (18,0) y (0,9).","Semiplano del origen."],
+        solucion:"Semiplano del origen (y normalmente x,y≥0)."},
+      { tipo:"pl", titulo:"PRL: maximiza impacto preventivo",
+        enunciado:"x=inspecciones, y=formaciones. \\(x+y\\le 14\\), \\(2x+y\\le 20\\), x,y≥0. Impacto z=60x+40y.",
+        pista:"Vértices ejes + intersección.",
+        pasos:["Ejes: (0,0), (10,0), (0,14).","Intersección: x+y=14 y 2x+y=20 ⇒ x=6, y=8.",
+              "z(10,0)=600; z(0,14)=560; z(6,8)=680.","Mejor: (6,8)."],
+        solucion:"Óptimo: (6,8), z=680."}
+    ],
+    admin: [
+      { tipo:"lin1", titulo:"Administración: tiempo de gestión",
+        enunciado:"Cada expediente requiere 35 min. Hay 8 horas. ¿Máximo x expedientes?",
+        pista:"8h=480min.",
+        pasos:["35x ≤ 480","x ≤ 13,71…","Máximo entero: 13"],
+        solucion:"Máximo: x=13."},
+      { tipo:"quad1", titulo:"Administración: condición de coste",
+        enunciado:"Resuelve \\(x^2-12x+35 \\ge 0\\).",
+        pista:"Factoriza: (x-5)(x-7).",
+        pasos:["(x-5)(x-7) ≥ 0","≥0 fuera del intervalo entre 5 y 7.","Incluye 5 y 7."],
+        solucion:"Solución: \\(( -\\infty,5] \\cup [7,\\infty)\\)."},
+      { tipo:"rat1", titulo:"Administración: ratio (racional)",
+        enunciado:"Resuelve \\(\\frac{x-4}{x+2} < 0\\).",
+        pista:"Críticos: -2 y 4.",
+        pasos:["Dominio: x≠-2.","Cero: x=4.","Signos: (-∞,-2)->(+), (-2,4)->(-), (4,∞)->(+).","<0: (-2,4)."],
+        solucion:"Solución: \\((-2,4)\\)."},
+      { tipo:"lin2", titulo:"Administración: semiplano de horas",
+        enunciado:"x=tareas A, y=tareas B. \\(x+3y\\le 30\\).",
+        pista:"Puntos: (30,0) y (0,10).",
+        pasos:["Recta x+3y=30.","(0,0) cumple.","Semiplano del origen."],
+        solucion:"Semiplano del origen (con x,y≥0 si aplica)."},
+      { tipo:"pl", titulo:"Administración y finanzas: maximiza valor",
+        enunciado:"x=trámites, y=contabilidad. \\(x+2y\\le 30\\), \\(2x+y\\le 36\\), x,y≥0. Valor z=40x+60y.",
+        pista:"Intersección de rectas + ejes.",
+        pasos:["Ejes: (0,0), (18,0), (0,15).","Intersección: x+2y=30 y 2x+y=36 ⇒ (14,8).",
+              "z(18,0)=720; z(0,15)=900; z(14,8)=1040.","Mejor: (14,8)."],
+        solucion:"Óptimo: (14,8), z=1040."}
+    ]
+  };
+
+  // -------------------------
+  // GeoGebra IDs por familia (rellena luego)
+  // -------------------------
+  const geogebraIDs = {
+    pelu: "TU_ID_AQUI",
+    madera: "TU_ID_AQUI",
+    sold: "TU_ID_AQUI",
+    auto: "TU_ID_AQUI",
+    alim: "TU_ID_AQUI",
+    prl: "TU_ID_AQUI",
+    admin: "TU_ID_AQUI"
+  };
+
+  // -------------------------
+  // Ejemplos: visualización por pasos
+  // -------------------------
+  let ejemploActual = null;
+  let idxPaso = 0;
+  const ejemploBox = document.getElementById('ejemploBox');
+
+  function renderEjemplo(){
+    if(!ejemploActual) return;
+    const pasosMostrados = ejemploActual.pasos.slice(0, idxPaso);
+    ejemploBox.innerHTML = `
+      <div class="callout">
+        <b>${ejemploActual.titulo}</b><br/>
+        <span class="mini">${ejemploActual.enunciado}</span>
+      </div>
+
+      <div class="callout ${idxPaso===0 ? "warn" : ""}">
+        <b>Pasos</b>
+        <ol class="steps">
+          ${pasosMostrados.map(p=>`<li>${p}</li>`).join('') || `<li class="mini">Pulsa “Pista” o “Siguiente paso”.</li>`}
+        </ol>
+      </div>
+
+      <div id="solFinal" class="callout ok hidden">
+        <b>Solución</b><br/>
+        <span>${ejemploActual.solucion}</span>
+      </div>
+    `;
+    if(window.MathJax && MathJax.typesetPromise){ MathJax.typesetPromise(); }
+  }
+
+  function randomEjemplo(){
+    const fam = familiaSel.value;
+    const arr = ejemplos[fam] || [];
+    ejemploActual = arr[Math.floor(Math.random()*arr.length)] || null;
+    idxPaso = 0;
+    renderEjemplo();
+  }
+
+  function resetEjemplo(){ randomEjemplo(); }
+
+  document.getElementById('btnEjemplo').addEventListener('click', ()=>{
+    document.querySelector('#ejemplos').scrollIntoView({behavior:'smooth'});
+  });
+  document.getElementById('btnPractica').addEventListener('click', ()=>{
+    document.querySelector('#practica').scrollIntoView({behavior:'smooth'});
+  });
+
+  document.getElementById('btnPista').addEventListener('click', ()=>{
+    if(!ejemploActual) return;
+    idxPaso = Math.min(idxPaso + 1, ejemploActual.pasos.length);
+    renderEjemplo();
+  });
+
+  document.getElementById('btnPaso').addEventListener('click', ()=>{
+    if(!ejemploActual) return;
+    idxPaso = Math.min(idxPaso + 1, ejemploActual.pasos.length);
+    renderEjemplo();
+  });
+
+  document.getElementById('btnSol').addEventListener('click', ()=>{
+    if(!teacher){
+      alert("Solución protegida. Activa ‘Modo profesor’ (PIN).");
+      return;
+    }
+    const sol = document.getElementById('solFinal');
+    if(sol){ sol.classList.remove('hidden'); }
+  });
+
+  document.getElementById('btnOtro').addEventListener('click', resetEjemplo);
+
+  // -------------------------
+  // GeoGebra (código iframe dinámico)
+  // -------------------------
+  const ggCode = document.getElementById('ggCode');
+  function renderGeoGebra(){
+    const id = geogebraIDs[familiaSel.value] || "TU_ID_AQUI";
+    ggCode.textContent =
+`<iframe
+  src="https://www.geogebra.org/material/iframe/id/${id}/width/900/height/520/border/888888/rc/false/ai/false"
+  width="100%" height="520" style="border:0" allowfullscreen></iframe>`;
+  }
+
+  // -------------------------
+  // Práctica 1D: generador + corrector tolerante
+  // -------------------------
+  let practice1D = null;
+  const box1D = document.getElementById('practicaBox1D');
+  const in1D = document.getElementById('respInput1D');
+  const fb1D = document.getElementById('feedback1D');
+
+  function norm(s){
+    return (s||"").toLowerCase().replace(/\s+/g,'').replace(/≤/g,'<=').replace(/≥/g,'>=').replace(/∞/g,'inf').replace(/,/g,'.');
+  }
+  function close(a,b,eps=1e-6){ return Math.abs(a-b) <= eps; }
+
+  function parseLin1Answer(s){
+    const m = norm(s).match(/x(<=|>=|<|>)(-?\d+(\.\d+)?)/);
+    if(!m) return null;
+    return { op:m[1], val: parseFloat(m[2]) };
+  }
+
+  function new1D(){
+    fb1D.classList.add('hidden');
+    in1D.value = "";
+    const a = [2,3,4,5,6][Math.floor(Math.random()*5)];
+    const max = [8,10,12,14,16][Math.floor(Math.random()*5)];
+    const b = a*max;
+    practice1D = {
+      prompt:`Resuelve \\(${a}x \\le ${b}\\). Escribe:  x <= número`,
+      hint:`Divide entre ${a} (no cambia el signo porque ${a}>0).`,
+      ans:{ op:"<=", val:max }
+    };
+    box1D.innerHTML = `<div class="callout"><b>Ejercicio</b><br/><span class="mini">${practice1D.prompt}</span></div>`;
+    if(window.MathJax && MathJax.typesetPromise){ MathJax.typesetPromise(); }
+  }
+
+  document.getElementById('btnNew1D').onclick = new1D;
+  document.getElementById('btnHint1D').onclick = ()=>{
+    fb1D.classList.remove('hidden');
+    fb1D.className = "callout warn";
+    fb1D.innerHTML = `<b>Pista</b><br/><span class="mini">${practice1D.hint}</span>`;
+  };
+  document.getElementById('btnCheck1D').onclick = ()=>{
+    const got = parseLin1Answer(in1D.value);
+    fb1D.classList.remove('hidden');
+    if(!got){
+      fb1D.className = "callout bad";
+      fb1D.innerHTML = `<b>❌ Formato</b><br/><span class="mini">Usa: <span class="code" style="display:inline-block">x <= número</span></span>`;
+      return;
+    }
+    const ok = (got.op===practice1D.ans.op) && close(got.val, practice1D.ans.val);
+    if(ok){
+      fb1D.className = "callout ok";
+      fb1D.innerHTML = `<b>✅ Correcto</b><br/><span class="mini">Esperado: <span class="code" style="display:inline-block">x <= ${practice1D.ans.val}</span></span>`;
+    }else{
+      fb1D.className = "callout bad";
+      fb1D.innerHTML = `<b>❌ Aún no</b><br/><span class="mini">${practice1D.hint}</span>`;
+    }
+  };
+
+  // -------------------------
+  // Práctica 2D: elegir semiplano correcto (autocorregible)
+  // -------------------------
+  let practice2D = null;
+  const box2D = document.getElementById('practicaBox2D');
+  const choices2D = document.getElementById('choices2D');
+  const fb2D = document.getElementById('feedback2D');
+
+  function new2D(){
+    fb2D.classList.add('hidden');
+    // Genera una recta ax+by <= c con a,b positivos
+    const a = [1,2,3,4][Math.floor(Math.random()*4)];
+    const b = [1,2,3,4][Math.floor(Math.random()*4)];
+    const c = [8,10,12,14,16,18,20][Math.floor(Math.random()*7)];
+
+    // Punto de prueba: origen (0,0)
+    const originTrue = (0 <= c); // siempre true con c positivo, pero mantenemos la estructura
+    // Para que haya variedad, alternamos signo y punto de prueba
+    const sign = Math.random() < 0.5 ? "<=" : ">=";
+    const px = Math.random() < 0.5 ? 0 : 1;   // punto de prueba (0,0) o (1,1)
+    const py = px;
+    const testVal = a*px + b*py;
+    const condTrue = (sign === "<=") ? (testVal <= c) : (testVal >= c);
+
+    // Opciones: "lado del punto de prueba" o "lado contrario"
+    const correct = condTrue ? "A" : "B"; // A = contiene punto de prueba
+    practice2D = {
+      a,b,c,sign,px,py,
+      prompt:`Decide qué semiplano satisface \\(${a}x+${b}y ${sign} ${c}\\) usando el punto de prueba \\(P=(${px},${py})\\).`,
+      hint:`Sustituye P en la desigualdad. Si se cumple, el semiplano solución es el que contiene a P.`,
+      correctChoice: "A", // por definición A representa “el que contiene el punto de prueba” si cumple; vamos a codificarlo así:
+      // pero si P no cumple, entonces la solución es el otro lado
+      correct: condTrue ? "A" : "B"
+    };
+
+    box2D.innerHTML = `
+      <div class="callout"><b>Ejercicio</b><br/>
+        <span class="mini">${practice2D.prompt}</span>
+      </div>
+      <div class="callout warn">
+        <b>Opciones</b><br/>
+        <span class="mini">A = el semiplano que contiene el punto P. · B = el semiplano contrario.</span>
+      </div>
+    `;
+
+    choices2D.innerHTML = `
+      <div class="choice" data-choice="A">
+        <strong>Opción A</strong>
+        <div class="mini">El semiplano solución contiene a P.</div>
+      </div>
+      <div class="choice" data-choice="B">
+        <strong>Opción B</strong>
+        <div class="mini">El semiplano solución NO contiene a P.</div>
+      </div>
+    `;
+
+    choices2D.querySelectorAll('.choice').forEach(el=>{
+      el.onclick = ()=>{
+        const pick = el.getAttribute('data-choice');
+        fb2D.classList.remove('hidden');
+        if(pick === practice2D.correct){
+          fb2D.className = "callout ok";
+          fb2D.innerHTML = `<b>✅ Correcto</b><br/><span class="mini">Bien: compruebas P y eliges el lado correspondiente.</span>`;
+        }else{
+          fb2D.className = "callout bad";
+          fb2D.innerHTML = `<b>❌ Aún no</b><br/><span class="mini">${practice2D.hint}</span>`;
+        }
+      };
+    });
+
+    if(window.MathJax && MathJax.typesetPromise){ MathJax.typesetPromise(); }
+  }
+
+  document.getElementById('btnNew2D').onclick = new2D;
+  document.getElementById('btnHint2D').onclick = ()=>{
+    fb2D.classList.remove('hidden');
+    fb2D.className = "callout warn";
+    fb2D.innerHTML = `<b>Pista</b><br/><span class="mini">${practice2D.hint}</span>`;
+  };
+
+  // -------------------------
+  // Práctica PL: generador + corrector tolerante
+  // -------------------------
+  let practicePL = null;
+  const boxPL = document.getElementById('practicaBoxPL');
+  const inPL = document.getElementById('respInputPL');
+  const fbPL = document.getElementById('feedbackPL');
+
+  function parsePLAnswer(s){
+    const t = norm(s);
+    const m = t.match(/optimo:?\(x,y\)=\((-?\d+(\.\d+)?),(-?\d+(\.\d+)?)\),z=((-?\d+(\.\d+)?))/);
+    if(!m) return null;
+    return { x: parseFloat(m[1]), y: parseFloat(m[3]), z: parseFloat(m[5]) };
+  }
+
+  function newPL(){
+    fbPL.classList.add('hidden');
+    inPL.value = "";
+
+    const p = [20,30,40][Math.floor(Math.random()*3)];
+    const q = [10,20,25][Math.floor(Math.random()*3)];
+    const xMax = [6,8,10][Math.floor(Math.random()*3)];
+    const yMax = [5,7,9][Math.floor(Math.random()*3)];
+    const m = Math.min(xMax+yMax-1, [8,10,12,14][Math.floor(Math.random()*4)]);
+
+    const verts = [[0,0]];
+    if(xMax<=m) verts.push([xMax,0]);
+    if(yMax<=m) verts.push([0,yMax]);
+    const y1 = m - xMax; if(y1>=0 && y1<=yMax) verts.push([xMax,y1]);
+    const x1 = m - yMax; if(x1>=0 && x1<=xMax) verts.push([x1,yMax]);
+
+    let best = null;
+    verts.forEach(([x,y])=>{
+      const z = p*x + q*y;
+      if(!best || z>best.z) best = {x,y,z};
+    });
+
+    practicePL = {
+      prompt:`Maximiza \\(z=${p}x+${q}y\\) con: \\(x\\le ${xMax}\\), \\(y\\le ${yMax}\\), \\(x+y\\le ${m}\\), \\(x\\ge0\\), \\(y\\ge0\\).
+Escribe:  optimo: (x,y)=(a,b), z=c`,
+      hint:"Saca vértices (intersecciones con ejes y con x+y=m) y evalúa z.",
+      ans: best
+    };
+
+    boxPL.innerHTML = `<div class="callout"><b>Ejercicio</b><br/><span class="mini">${practicePL.prompt}</span></div>`;
+    if(window.MathJax && MathJax.typesetPromise){ MathJax.typesetPromise(); }
+  }
+
+  document.getElementById('btnNewPL').onclick = newPL;
+  document.getElementById('btnHintPL').onclick = ()=>{
+    fbPL.classList.remove('hidden');
+    fbPL.className = "callout warn";
+    fbPL.innerHTML = `<b>Pista</b><br/><span class="mini">${practicePL.hint}</span>`;
+  };
+  document.getElementById('btnCheckPL').onclick = ()=>{
+    const got = parsePLAnswer(inPL.value);
+    fbPL.classList.remove('hidden');
+    if(!got){
+      fbPL.className = "callout bad";
+      fbPL.innerHTML = `<b>❌ Formato</b><br/><span class="mini">Usa: <span class="code" style="display:inline-block">optimo: (x,y)=(a,b), z=c</span></span>`;
+      return;
+    }
+    const ok = close(got.x, practicePL.ans.x) && close(got.y, practicePL.ans.y) && close(got.z, practicePL.ans.z);
+    if(ok){
+      fbPL.className = "callout ok";
+      fbPL.innerHTML = `<b>✅ Correcto</b><br/><span class="mini">Esperado: <span class="code" style="display:inline-block">optimo: (x,y)=(${practicePL.ans.x},${practicePL.ans.y}), z=${practicePL.ans.z}</span></span>`;
+    }else{
+      fbPL.className = "callout bad";
+      fbPL.innerHTML = `<b>❌ Aún no</b><br/><span class="mini">${practicePL.hint}</span>`;
+    }
+  };
+
+  // -------------------------
+  // Cambio de familia
+  // -------------------------
+  familiaSel.addEventListener('change', ()=>{
+    setObjetivo();
+    randomEjemplo();
+    renderGeoGebra();
+  });
+
+  // Inicializar
+  randomEjemplo();
+  renderGeoGebra();
+  new1D();
+  new2D();
+  newPL();
+
+</script>
+</body>
+</html>
